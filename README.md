@@ -1,95 +1,67 @@
-# CRUD Factory (Cloudflare)
+# CRUD Factory
 
-Monorepo for up to **10 customer-facing CRUD apps** on your **Cloudflare** account: each app is a Next.js site on **Workers**, with its own **D1** database, **email/password auth**, and **HTTPS** (Workers dev URL or your custom domain).
+**A Cursor-friendly monorepo codebase** for up to **10 customer-facing CRUD apps** on **Cloudflare**: Workers, D1, HTTPS, and per-app tech stacks.
 
-## What's included
+Start here: **[CODEBASE.md](./CODEBASE.md)** (clone → install → run `demo` → provision Cloudflare).
 
-| Piece | Technology |
-|--------|------------|
-| Apps | Next.js 16 (`apps/<slug>`) |
-| Deploy | [OpenNext Cloudflare](https://opennext.js.org/cloudflare) + Wrangler |
-| Database | Cloudflare D1 (SQLite), Drizzle ORM |
-| Auth | Better Auth (sessions in D1) |
-| SSL | Automatic on `*.workers.dev` and proxied custom domains |
-| IaC | Terraform DNS stubs (`infra/terraform`) + `scripts/provision-cloudflare.sh` |
+## Stacks (pick per app)
 
-The included **`demo`** app is a full CRUD example (sign up, sign in, create/edit/delete records scoped to the signed-in user).
+| Stack | What you get |
+|--------|----------------|
+| **next-d1** | Next.js + Better Auth + CRUD UI → Workers (OpenNext) |
+| **vite-d1** | Vite React SPA + Hono API on one Worker |
+| **hono-d1** | Hono JSON API only (bring your own client) |
 
-## Prerequisites
-
-- Node 20+ and pnpm
-- Cloudflare account
-- [Wrangler](https://developers.cloudflare.com/workers/wrangler/) authenticated: `npx wrangler login`
-
-## Local development (demo)
+Catalog: `platform/stacks.json`.
 
 ```bash
-pnpm install
-cp .env.example apps/demo/.env.local
-# Edit BETTER_AUTH_SECRET (e.g. openssl rand -base64 32)
+pnpm new-app acme --stack vite-d1
+```
 
-cd apps/demo
-pnpm db:push
+## Shared platform
+
+| Piece | Location |
+|--------|-----------|
+| Database schema & migrations | `packages/database` |
+| Auth (Next stack) | `packages/auth` |
+| App registry | `apps.registry.json` |
+| Provision D1 + secrets | `scripts/provision-cloudflare.sh` |
+| Optional DNS | `infra/terraform` |
+
+## Quick start (local)
+
+```bash
+pnpm install --dangerously-allow-all-builds
+cp .env.example apps/demo/.env.local
+pnpm --filter demo db:push
 pnpm dev
 ```
 
-Open http://127.0.0.1:43123 — data is stored in `apps/demo/.data/demo.sqlite`.
+http://127.0.0.1:43123
 
-## Provision on Cloudflare (first app)
+## Quick start (Cloudflare)
 
 ```bash
-export CLOUDFLARE_ACCOUNT_ID=your_account_id
-# API token with D1 + Workers edit, or use wrangler login
-
-chmod +x scripts/provision-cloudflare.sh
+npx wrangler login
+export CLOUDFLARE_ACCOUNT_ID=...
 ./scripts/provision-cloudflare.sh demo
+cd apps/demo && pnpm deploy
 ```
 
-This creates the D1 database, applies migrations, writes the database ID into `apps/demo/wrangler.jsonc`, and stores `BETTER_AUTH_SECRET` as a Worker secret.
+Custom domains: Worker → **Domains & Routes** (SSL is automatic on Cloudflare).
 
-Deploy:
+## Repo layout
 
-```bash
-cd apps/demo
-export BETTER_AUTH_URL=https://crud-demo.<your-subdomain>.workers.dev
-export NEXT_PUBLIC_BETTER_AUTH_URL=$BETTER_AUTH_URL
-pnpm deploy
+```
+apps/          # deployable products
+templates/     # stack templates (used by new-app)
+packages/      # shared libraries
+platform/      # stack metadata
+scripts/       # automation
 ```
 
-Set the same `BETTER_AUTH_URL` / `NEXT_PUBLIC_BETTER_AUTH_URL` in the Worker (vars in `wrangler.jsonc` or dashboard) so auth cookies match your public URL.
-
-### Custom domain (SSL included)
-
-1. In the Cloudflare dashboard, open the **crud-demo** Worker → **Settings** → **Domains & Routes** → add `demo.yourdomain.com`.
-2. Optionally apply Terraform DNS (proxied records):
-
-```bash
-cd infra/terraform
-cp terraform.tfvars.example terraform.tfvars
-terraform init && terraform apply
-```
-
-## Add another app (up to 10)
-
-```bash
-pnpm new-app acme-books
-./scripts/provision-cloudflare.sh acme-books
-pnpm --filter acme-books db:push   # local only
-pnpm --filter acme-books dev
-```
-
-Each app gets its own D1 database (`crud-<slug>`) and Worker name. Registry: `apps.registry.json`.
+Open **`crud-factory.code-workspace`** in Cursor to focus indexing on apps and packages.
 
 ## CI
 
-`.github/workflows/deploy-demo.yml` deploys `demo` on push to `main` when you set repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
-
-## Project layout
-
-```
-apps/demo/          # Example customer CRUD app + wrangler.jsonc
-packages/database/  # Drizzle schema + D1 migrations
-packages/auth/      # Better Auth wiring
-scripts/            # new-app + Cloudflare provisioning
-infra/terraform/    # Optional DNS for *.yourdomain.com
-```
+`.github/workflows/deploy-demo.yml` deploys `demo` when `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are set on the repo.

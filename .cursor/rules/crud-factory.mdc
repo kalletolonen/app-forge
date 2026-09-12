@@ -1,0 +1,43 @@
+---
+description: Cloudflare CRUD factory monorepo — how to add apps and shared packages
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# CRUD Factory codebase
+
+This repo hosts up to **10 customer-facing apps** on **Cloudflare** (Workers, D1, automatic SSL). Tech **varies per app** — pick a stack when scaffolding.
+
+## Layout
+
+- `apps/<slug>/` — deployable apps (one folder per product)
+- `packages/database` — Drizzle schema + D1 migrations (shared)
+- `packages/auth` — Better Auth (used by `next-d1` stack)
+- `templates/<stack>/` — sources for `pnpm new-app`
+- `platform/stacks.json` — stack catalog
+- `apps.registry.json` — deployed app registry (slug, stack, worker name, D1 name)
+
+## Add an app
+
+```bash
+pnpm new-app <slug> --stack next-d1   # or vite-d1, hono-d1
+./scripts/provision-cloudflare.sh <slug>
+```
+
+Do **not** copy `apps/demo` by hand — use templates via `new-app`.
+
+## Stacks
+
+| Stack | Use when |
+|-------|----------|
+| `next-d1` | Full web app + email/password auth + CRUD UI |
+| `vite-d1` | React SPA + Hono API on one Worker |
+| `hono-d1` | JSON API only (mobile / separate UI) |
+
+## Conventions
+
+- Each app has its own **D1** database (`crud-<slug>`).
+- `APP_ID` env matches registry `slug`.
+- Prefer extending `packages/database` for shared tables; app-specific tables only when necessary.
+- Deploy per app: `pnpm --filter <slug> deploy`.

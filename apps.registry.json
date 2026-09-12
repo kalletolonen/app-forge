@@ -5,6 +5,8 @@
     {
       "slug": "demo",
       "displayName": "Demo Records",
+      "stack": "next-d1",
+      "deployTarget": "workers",
       "workerName": "crud-demo",
       "d1Database": "crud-demo",
       "subdomain": "demo"

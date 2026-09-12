@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "crud-SLUG",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-04-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "crud-SLUG",
+      "database_id": "REPLACE_AFTER_PROVISION",
+      "migrations_dir": "../../packages/database/migrations"
+    }
+  ],
+  "vars": {
+    "APP_ID": "SLUG"
+  }
+}

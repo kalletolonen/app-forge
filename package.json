@@ -1,5 +1,6 @@
 {
   "name": "crud-factory",
+  "description": "Cloudflare monorepo codebase for customer CRUD apps (multi-stack, D1, Workers)",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -8,6 +9,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "new-app": "node scripts/new-app.mjs",
+    "stacks": "node -e \"console.log(JSON.stringify(require('./platform/stacks.json'),null,2))\"",
     "db:push": "pnpm --filter demo db:push"
   },
   "devDependencies": {

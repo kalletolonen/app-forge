@@ -13,6 +13,7 @@ APP_JSON="$(node -e "
 
 WORKER_NAME="$(node -e "console.log(JSON.parse(process.argv[1]).workerName)" "$APP_JSON")"
 D1_NAME="$(node -e "console.log(JSON.parse(process.argv[1]).d1Database)" "$APP_JSON")"
+STACK="$(node -e "console.log(JSON.parse(process.argv[1]).stack || 'next-d1')" "$APP_JSON")"
 APP_DIR="$ROOT/apps/$SLUG"
 
 if [[ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]]; then
@@ -21,6 +22,8 @@ if [[ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]]; then
 fi
 
 export CLOUDFLARE_ACCOUNT_ID
+
+echo "Stack: $STACK — Worker: $WORKER_NAME — D1: $D1_NAME"
 
 echo "Creating D1 database: $D1_NAME"
 CREATE_OUT="$(wrangler d1 create "$D1_NAME" 2>&1)" || true
@@ -32,19 +35,24 @@ if [[ -z "$DB_ID" ]]; then
   DB_ID="$(wrangler d1 list | grep "$D1_NAME" | awk '{print $1}' | head -1)"
 fi
 
-if [[ -n "$DB_ID" ]]; then
-  sed -i "s/REPLACE_AFTER_PROVISION/$DB_ID/" "$APP_DIR/wrangler.jsonc" 2>/dev/null || \
-    sed -i '' "s/REPLACE_AFTER_PROVISION/$DB_ID/" "$APP_DIR/wrangler.jsonc"
+WRANGLER_FILE="$APP_DIR/wrangler.jsonc"
+if [[ -f "$WRANGLER_FILE" && -n "$DB_ID" ]]; then
+  sed -i "s/REPLACE_AFTER_PROVISION/$DB_ID/" "$WRANGLER_FILE" 2>/dev/null || \
+    sed -i '' "s/REPLACE_AFTER_PROVISION/$DB_ID/" "$WRANGLER_FILE"
 fi
 
 echo "Applying D1 migrations (remote)..."
 (cd "$APP_DIR" && wrangler d1 migrations apply "$D1_NAME" --remote)
 
-SECRET="$(openssl rand -base64 32)"
-echo "Setting Worker secrets (run deploy after setting BETTER_AUTH_URL to your live URL)..."
-(cd "$APP_DIR" && wrangler secret put BETTER_AUTH_SECRET <<< "$SECRET")
+if [[ "$STACK" == "next-d1" ]]; then
+  SECRET="$(openssl rand -base64 32)"
+  echo "Setting BETTER_AUTH_SECRET on Worker..."
+  (cd "$APP_DIR" && wrangler secret put BETTER_AUTH_SECRET <<< "$SECRET")
+  echo "After deploy, set BETTER_AUTH_URL and NEXT_PUBLIC_BETTER_AUTH_URL to your public Worker URL."
+else
+  echo "Stack $STACK: wire auth before exposing to customers (API is open by default)."
+fi
 
 echo ""
 echo "Provisioned $D1_NAME (id: ${DB_ID:-unknown})."
 echo "Deploy: pnpm --filter $SLUG deploy"
-echo "Then set BETTER_AUTH_URL / NEXT_PUBLIC_BETTER_AUTH_URL to https://<your-worker>.workers.dev"

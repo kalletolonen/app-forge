@@ -1,0 +1,25 @@
+{
+  "stacks": [
+    {
+      "id": "next-d1",
+      "label": "Next.js + D1 + Better Auth",
+      "deployTarget": "workers",
+      "description": "Full customer CRUD with App Router, OpenNext deploy, email/password auth.",
+      "provision": { "d1": true, "authSecret": true }
+    },
+    {
+      "id": "vite-d1",
+      "label": "Vite React + Hono Worker + D1",
+      "deployTarget": "workers",
+      "description": "SPA on Workers Assets with a Hono API and shared Drizzle schema. Wire your own auth when ready.",
+      "provision": { "d1": true, "authSecret": false }
+    },
+    {
+      "id": "hono-d1",
+      "label": "Hono API + D1",
+      "deployTarget": "workers",
+      "description": "JSON REST API only — pair with a mobile app, separate frontend, or another stack.",
+      "provision": { "d1": true, "authSecret": false }
+    }
+  ]
+}

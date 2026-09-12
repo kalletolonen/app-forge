@@ -1,0 +1,41 @@
+{
+  "name": "demo",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 43123 --hostname 127.0.0.1",
+    "build": "next build",
+    "build:cf": "opennextjs-cloudflare build",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "db:push": "mkdir -p .data && sh -c 'cd ../../packages/database && APP_ID=demo LOCAL_DATABASE_URL=file://$INIT_CWD/.data/demo.sqlite drizzle-kit push'",
+    "db:migrate:local": "wrangler d1 migrations apply crud-demo --local",
+    "start": "next start",
+    "lint": "eslint --max-warnings 0",
+    "check-types": "next typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "@opennextjs/cloudflare": "^1.6.5",
+    "@repo/auth": "workspace:*",
+    "@repo/database": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "better-auth": "^1.3.7",
+    "drizzle-orm": "^0.44.5",
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250912.0",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "26.4.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "drizzle-kit": "^0.31.4",
+    "eslint": "10.9.1",
+    "typescript": "7.0.2",
+    "wrangler": "^4.36.0"
+  }
+}

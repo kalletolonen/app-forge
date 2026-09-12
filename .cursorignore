@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.open-next/
+dist/
+.data/
+.wrangler/
+.turbo/
+pnpm-lock.yaml
+**/*.woff
+**/*.ico
+templates/next-d1/app/fonts/
+apps/demo/app/fonts/

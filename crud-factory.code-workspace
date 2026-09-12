@@ -1,0 +1,15 @@
+{
+  "folders": [
+    { "name": "apps / demo", "path": "apps/demo" },
+    { "name": "packages", "path": "packages" },
+    { "name": "templates", "path": "templates" },
+    { "name": "platform & scripts", "path": "scripts" }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/.next": true,
+      "**/.open-next": true
+    }
+  }
+}
