@@ -1,0 +1,25 @@
+{
+  "name": "@repo/database",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.15.15",
+    "drizzle-orm": "^0.44.5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250912.0",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "26.4.1",
+    "drizzle-kit": "^0.31.4",
+    "typescript": "7.0.2"
+  }
+}

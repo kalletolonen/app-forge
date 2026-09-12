@@ -1,0 +1,23 @@
+{
+  "name": "@repo/auth",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/auth-client.ts"
+  },
+  "dependencies": {
+    "@repo/database": "workspace:*",
+    "better-auth": "^1.3.7",
+    "drizzle-orm": "^0.44.5"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "26.4.1",
+    "typescript": "7.0.2"
+  }
+}

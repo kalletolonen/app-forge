@@ -1,0 +1,22 @@
+{
+  "name": "crud-factory",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --filter=demo",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types",
+    "new-app": "node scripts/new-app.mjs",
+    "db:push": "pnpm --filter demo db:push"
+  },
+  "devDependencies": {
+    "prettier": "3.9.6",
+    "turbo": "^2.10.12",
+    "typescript": "7.0.2"
+  },
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=20"
+  }
+}

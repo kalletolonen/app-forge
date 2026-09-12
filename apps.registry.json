@@ -1,0 +1,13 @@
+{
+  "platform": "cloudflare",
+  "maxApps": 10,
+  "apps": [
+    {
+      "slug": "demo",
+      "displayName": "Demo Records",
+      "workerName": "crud-demo",
+      "d1Database": "crud-demo",
+      "subdomain": "demo"
+    }
+  ]
+}
