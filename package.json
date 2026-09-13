@@ -9,6 +9,9 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "new-app": "node scripts/new-app.mjs",
+    "go-live": "node scripts/go-live.mjs",
+    "check-integrations": "node scripts/go-live.mjs --check",
+    "test": "node --test scripts/*.test.mjs",
     "stacks": "node -e \"console.log(JSON.stringify(require('./platform/stacks.json'),null,2))\"",
     "db:push": "pnpm --filter demo db:push"
   },

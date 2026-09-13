@@ -1,6 +1,7 @@
 {
   "platform": "cloudflare",
   "maxApps": 10,
+  "rootDomain": "",
   "apps": [
     {
       "slug": "demo",

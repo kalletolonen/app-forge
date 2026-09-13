@@ -13,10 +13,15 @@ variable "cloudflare_zone_id" {
   type        = string
   default     = ""
   description = "Zone ID for your root domain (required when root_domain is set)"
+
+  validation {
+    condition     = var.root_domain == "" || var.cloudflare_zone_id != ""
+    error_message = "cloudflare_zone_id is required when root_domain is set."
+  }
 }
 
 variable "root_domain" {
   type        = string
   default     = ""
-  description = "e.g. yourdomain.com — creates demo.yourdomain.com per app with SSL"
+  description = "e.g. yourdomain.com — optional; pnpm go-live can attach the same hostname via Wrangler"
 }

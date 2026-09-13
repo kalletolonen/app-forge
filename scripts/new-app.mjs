@@ -164,7 +164,7 @@ registry.apps.push({
 writeFileSync(registryPath, `${JSON.stringify(registry, null, 2)}\n`);
 
 const nextSteps = [
-  `Provision Cloudflare: ./scripts/provision-cloudflare.sh ${slug}`,
+  `Go live (D1 + public HTTPS URL): pnpm go-live ${slug}`,
 ];
 if (stack === "next-d1") {
   nextSteps.push(

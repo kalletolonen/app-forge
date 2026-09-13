@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createAppAuthClient } from "@repo/auth/client";
-
-const auth = createAppAuthClient(
-  process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "http://127.0.0.1:43123",
-);
+import { createBrowserAuthClient } from "@repo/auth/client";
 
 export function SignupForm() {
   const router = useRouter();
@@ -22,7 +18,11 @@ export function SignupForm() {
     const email = String(form.get("email"));
     const password = String(form.get("password"));
 
-    const result = await auth.signUp.email({ name, email, password });
+    const result = await createBrowserAuthClient().signUp.email({
+      name,
+      email,
+      password,
+    });
     setPending(false);
 
     if (result.error) {

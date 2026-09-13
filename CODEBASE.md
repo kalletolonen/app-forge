@@ -16,7 +16,11 @@ Use this repository as your **starting codebase**: clone it, connect it in Curso
    pnpm --filter demo db:push
    pnpm dev
    ```
-4. **Cloudflare** (when ready): `npx wrangler login`, then `./scripts/provision-cloudflare.sh demo`.
+4. **Public URL** (when ready): set `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`, then:
+   ```bash
+   pnpm go-live demo
+   ```
+   That creates D1, deploys the Worker, and prints `https://crud-demo.<subdomain>.workers.dev`.
 
 ## Mental model
 
@@ -25,11 +29,11 @@ crud-factory/
 ├── apps/           ← your live products (max 10)
 ├── templates/      ← blueprints (do not edit for one-off hacks)
 ├── packages/       ← shared DB + auth
-├── scripts/        ← new-app, provision-cloudflare
-└── apps.registry.json  ← source of truth for slugs & stacks
+├── scripts/        ← new-app, go-live
+└── apps.registry.json  ← source of truth for slugs, stacks, and public URLs
 ```
 
-Each **app** can use a **different stack** (`next-d1`, `vite-d1`, `hono-d1`). Shared **D1 schema** lives in `packages/database`; SSL and public URLs come from Cloudflare.
+Each **app** can use a **different stack** (`next-d1`, `vite-d1`, `hono-d1`). Shared **D1 schema** lives in `packages/database`; SSL and public URLs come from Cloudflare (`workers.dev` immediately, custom domain when `ROOT_DOMAIN` is set).
 
 ## Cursor tips
 
@@ -43,15 +47,16 @@ Each **app** can use a **different stack** (`next-d1`, `vite-d1`, `hono-d1`). Sh
 |------|---------|
 | List stacks | `cat platform/stacks.json` |
 | New app | `pnpm new-app my-shop --stack vite-d1` |
-| Provision D1 + secrets | `./scripts/provision-cloudflare.sh my-shop` |
+| Check Cloudflare token | `pnpm go-live --check` |
+| Public HTTPS URL | `pnpm go-live my-shop` |
 | Dev one app | `pnpm --filter my-shop dev` |
-| Deploy one app | `pnpm --filter my-shop deploy` |
+| Deploy only (after go-live) | `pnpm --filter my-shop deploy` |
 
 ## What to customize
 
 - **Branding & copy** in each `apps/<slug>/` UI
 - **Auth** for `vite-d1` / `hono-d1` (templates ship open API — add JWT, API keys, or Cloudflare Access)
-- **Custom domains** in the Cloudflare dashboard per Worker
-- **Terraform** (`infra/terraform`) when you want DNS for `*.yourdomain.com`
+- **Custom domains** via `ROOT_DOMAIN` (go-live attaches `{subdomain}.{ROOT_DOMAIN}`)
+- **Terraform** (`infra/terraform`) when you want hostnames managed as code instead of Wrangler
 
-See [README.md](./README.md) for full deployment steps.
+See [README.md](./README.md) for token permissions and CI secrets.

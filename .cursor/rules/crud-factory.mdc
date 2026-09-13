@@ -22,10 +22,12 @@ This repo hosts up to **10 customer-facing apps** on **Cloudflare** (Workers, D1
 
 ```bash
 pnpm new-app <slug> --stack next-d1   # or vite-d1, hono-d1
-./scripts/provision-cloudflare.sh <slug>
+pnpm go-live <slug>
 ```
 
 Do **not** copy `apps/demo` by hand — use templates via `new-app`.
+
+`pnpm go-live` creates D1, deploys the Worker, and prints a public `workers.dev` HTTPS URL. Set `ROOT_DOMAIN` to also attach `{subdomain}.{ROOT_DOMAIN}`.
 
 ## Stacks
 
@@ -40,4 +42,4 @@ Do **not** copy `apps/demo` by hand — use templates via `new-app`.
 - Each app has its own **D1** database (`crud-<slug>`).
 - `APP_ID` env matches registry `slug`.
 - Prefer extending `packages/database` for shared tables; app-specific tables only when necessary.
-- Deploy per app: `pnpm --filter <slug> deploy`.
+- Public URL: `pnpm go-live <slug>` (or `pnpm --filter <slug> deploy` after the first go-live).
