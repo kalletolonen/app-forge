@@ -23,5 +23,13 @@
   "packageManager": "pnpm@11.25.0",
   "engines": {
     "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "workerd", "sharp"],
+    "allowBuilds": {
+      "esbuild": true,
+      "workerd": true,
+      "sharp": true
+    }
   }
 }
