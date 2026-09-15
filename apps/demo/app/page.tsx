@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { requireSession } from "@/lib/session";
+import { optionalSession } from "@/lib/session";
 
 export default async function HomePage() {
-  const session = await requireSession();
+  const session = await optionalSession();
   if (session) {
     redirect("/dashboard");
   }

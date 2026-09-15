@@ -16,3 +16,12 @@ export async function requireSession() {
   }
   return session;
 }
+
+/** Like requireSession but never throws (for public pages that optionally redirect). */
+export async function optionalSession() {
+  try {
+    return await requireSession();
+  } catch {
+    return null;
+  }
+}
