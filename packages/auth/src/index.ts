@@ -27,15 +27,40 @@ export function originFromRequest(request: Request): string | null {
   }
 }
 
-export function trustedOrigins(baseURL: string): string[] {
-  const extra = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? "")
+/** Cloudflare Worker bindings / local .env overrides for auth. */
+export type AuthEnv = {
+  BETTER_AUTH_SECRET?: string;
+  BETTER_AUTH_URL?: string;
+  BETTER_AUTH_TRUSTED_ORIGINS?: string;
+};
+
+function readAuthEnv(overrides?: AuthEnv) {
+  return {
+    secret:
+      overrides?.BETTER_AUTH_SECRET ?? process.env.BETTER_AUTH_SECRET ?? "",
+    authUrl: overrides?.BETTER_AUTH_URL ?? process.env.BETTER_AUTH_URL ?? "",
+    trustedOrigins:
+      overrides?.BETTER_AUTH_TRUSTED_ORIGINS ??
+      process.env.BETTER_AUTH_TRUSTED_ORIGINS ??
+      "",
+  };
+}
+
+export function trustedOrigins(
+  baseURL: string,
+  overrides?: AuthEnv,
+): string[] {
+  const extra = readAuthEnv(overrides).trustedOrigins
     .split(",")
     .map((value) => value.trim())
     .filter(Boolean);
   return [...new Set([baseURL, ...extra])];
 }
 
-function resolveBaseURL(origin?: string | Request | null): string {
+function resolveBaseURL(
+  origin?: string | Request | null,
+  overrides?: AuthEnv,
+): string {
   if (typeof origin === "string" && origin) {
     return origin.replace(/\/$/, "");
   }
@@ -43,15 +68,15 @@ function resolveBaseURL(origin?: string | Request | null): string {
     const fromRequest = originFromRequest(origin);
     if (fromRequest) return fromRequest;
   }
-  const fromEnv = process.env.BETTER_AUTH_URL;
+  const fromEnv = readAuthEnv(overrides).authUrl;
   if (fromEnv) return fromEnv.replace(/\/$/, "");
   throw new Error(
     "Could not determine auth base URL. Open the Worker on its public URL, set BETTER_AUTH_URL, or run `pnpm go-live <slug>`.",
   );
 }
 
-function buildAuth(db: Db, baseURL: string) {
-  const secret = process.env.BETTER_AUTH_SECRET;
+function buildAuth(db: Db, baseURL: string, overrides?: AuthEnv) {
+  const secret = readAuthEnv(overrides).secret;
   if (!secret) {
     throw new Error(
       "BETTER_AUTH_SECRET must be set. For production run `pnpm go-live <slug>`; for local copy .env.example to apps/<slug>/.env.local.",
@@ -61,7 +86,7 @@ function buildAuth(db: Db, baseURL: string) {
   return betterAuth({
     secret,
     baseURL,
-    trustedOrigins: trustedOrigins(baseURL),
+    trustedOrigins: trustedOrigins(baseURL, overrides),
     emailAndPassword: {
       enabled: true,
       minPasswordLength: 8,
@@ -85,8 +110,9 @@ const authByDb = new WeakMap<Db, Map<string, AuthInstance>>();
 export function getAuth(
   db: Db,
   origin?: string | Request | null,
+  env?: AuthEnv,
 ): AuthInstance {
-  const baseURL = resolveBaseURL(origin);
+  const baseURL = resolveBaseURL(origin, env);
   let byUrl = authByDb.get(db);
   if (!byUrl) {
     byUrl = new Map();
@@ -96,7 +122,7 @@ export function getAuth(
   if (cached) {
     return cached;
   }
-  const instance = buildAuth(db, baseURL);
+  const instance = buildAuth(db, baseURL, env);
   byUrl.set(baseURL, instance);
   return instance;
 }
