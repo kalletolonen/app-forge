@@ -16,7 +16,7 @@ Use this repository as your **starting codebase**: clone it, connect it in Curso
    pnpm --filter demo db:push
    pnpm dev
    ```
-4. **Public URL** (when ready): set `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`, then:
+4. **Public URL** (when ready): set `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` (and `BETTER_AUTH_SECRET` for Next apps). See [README.md](./README.md#github-actions-secrets).
    ```bash
    pnpm go-live demo
    ```

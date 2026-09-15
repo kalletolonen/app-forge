@@ -34,6 +34,7 @@ pnpm go-live acme
 ```bash
 pnpm install --dangerously-allow-all-builds
 cp .env.example apps/demo/.env.local
+# set BETTER_AUTH_SECRET in that file (openssl rand -base64 32)
 pnpm --filter demo db:push
 pnpm dev
 ```
@@ -47,6 +48,8 @@ One command provisions D1, enables `workers.dev`, deploys the Worker, sets auth 
 ```bash
 export CLOUDFLARE_API_TOKEN=...
 export CLOUDFLARE_ACCOUNT_ID=...
+# optional: same value as the GitHub secret so CI and local stay in sync
+export BETTER_AUTH_SECRET="$(openssl rand -base64 32)"
 pnpm go-live demo
 ```
 
@@ -70,7 +73,19 @@ Create a token at https://dash.cloudflare.com/profile/api-tokens with:
 | Account | Account Settings: Read, Workers Scripts: Edit, D1: Edit |
 | Zone (only if using `ROOT_DOMAIN`) | DNS: Edit, SSL and Certificates: Edit, Workers Routes: Edit |
 
-Then set GitHub repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Optional repo **variables**: `ROOT_DOMAIN`, `CLOUDFLARE_ZONE_ID`.
+## GitHub Actions secrets
+
+**Settings → Secrets and variables → Actions.** Deploy workflows (`Go live`, `Deploy demo to Cloudflare`) read these at runtime — they are never committed.
+
+| Name | Required | Used by |
+|------|----------|---------|
+| `CLOUDFLARE_API_TOKEN` | Yes, to deploy | Cloudflare API (see permissions above) |
+| `CLOUDFLARE_ACCOUNT_ID` | Yes, to deploy | Account that owns the Worker and D1 |
+| `BETTER_AUTH_SECRET` | Recommended for `next-d1` apps | Worker secret for Better Auth. Generate once with `openssl rand -base64 32`. When this GitHub secret is set, `pnpm go-live` writes it onto the Worker **before** deploy. If it is missing, go-live generates a random secret the first time and leaves an existing Worker secret alone. |
+
+Optional **variables** (or secrets): `ROOT_DOMAIN`, `CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_WORKERS_DEV_SUBDOMAIN`.
+
+The **Tests** workflow only runs `node --test` and does not need any of these.
 
 ## Repo layout
 
@@ -86,5 +101,8 @@ Open **`crud-factory.code-workspace`** in Cursor to focus indexing on apps and p
 
 ## CI
 
-`.github/workflows/go-live.yml` deploys each changed app on push to `main`, and can publish any slug from **Actions → Go live → Run workflow**.
-It no-ops on push until the Cloudflare secrets above are set.
+| Workflow | When | Needs secrets |
+|----------|------|----------------|
+| **Tests** | Every push / PR | No |
+| **Go live** | Push to `main` when app/shared files change, or **Actions → Go live → Run workflow** | Cloudflare secrets above. Skips on push until they are set. |
+| **Deploy demo to Cloudflare** | Manual only | Same as Go live, always deploys `demo` |
