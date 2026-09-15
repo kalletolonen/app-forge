@@ -11,6 +11,7 @@ name: Go live
 #   ROOT_DOMAIN              e.g. example.com → {subdomain}.example.com
 #   CLOUDFLARE_ZONE_ID
 #   CLOUDFLARE_WORKERS_DEV_SUBDOMAIN
+#   BETTER_AUTH_SECRET           optional; when set, go-live updates the Worker secret
 
 on:
   workflow_dispatch:
@@ -91,6 +92,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
           ROOT_DOMAIN: ${{ vars.ROOT_DOMAIN || secrets.ROOT_DOMAIN }}
           CLOUDFLARE_ZONE_ID: ${{ vars.CLOUDFLARE_ZONE_ID || secrets.CLOUDFLARE_ZONE_ID }}
           CLOUDFLARE_WORKERS_DEV_SUBDOMAIN: ${{ vars.CLOUDFLARE_WORKERS_DEV_SUBDOMAIN || secrets.CLOUDFLARE_WORKERS_DEV_SUBDOMAIN }}

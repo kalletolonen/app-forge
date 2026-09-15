@@ -37,7 +37,9 @@ export type AuthEnv = {
 function readAuthEnv(overrides?: AuthEnv) {
   return {
     secret:
-      overrides?.BETTER_AUTH_SECRET ?? process.env.BETTER_AUTH_SECRET ?? "",
+      overrides?.BETTER_AUTH_SECRET?.trim() ??
+      process.env.BETTER_AUTH_SECRET?.trim() ??
+      "",
     authUrl: overrides?.BETTER_AUTH_URL ?? process.env.BETTER_AUTH_URL ?? "",
     trustedOrigins:
       overrides?.BETTER_AUTH_TRUSTED_ORIGINS ??

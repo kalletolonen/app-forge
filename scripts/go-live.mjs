@@ -339,19 +339,49 @@ function putSecret(appDir, name, value, dryRun) {
     console.log(`Would set Worker secret ${name}`);
     return;
   }
-  wrangler(appDir, ["secret", "put", name], { input: `${value}\n` });
+  wrangler(appDir, ["secret", "put", name], { input: value });
 }
 
 function ensureAuthSecret(appDir, dryRun) {
+  const fromEnv = process.env.BETTER_AUTH_SECRET?.trim();
+  if (fromEnv) {
+    console.log("Setting BETTER_AUTH_SECRET from BETTER_AUTH_SECRET env…");
+    putSecret(appDir, "BETTER_AUTH_SECRET", fromEnv, dryRun);
+    return;
+  }
   const names = secretNames(appDir);
   if (names.includes("BETTER_AUTH_SECRET")) {
     console.log("BETTER_AUTH_SECRET already set");
     return;
   }
-  const secret =
-    process.env.BETTER_AUTH_SECRET || randomBytes(32).toString("base64");
+  const secret = randomBytes(32).toString("base64");
   console.log("Setting BETTER_AUTH_SECRET…");
   putSecret(appDir, "BETTER_AUTH_SECRET", secret, dryRun);
+}
+
+function verifyD1Schema(appDir, d1Name, dryRun) {
+  if (dryRun) {
+    console.log(`Would verify D1 schema on ${d1Name}`);
+    return;
+  }
+  const result = wrangler(
+    appDir,
+    [
+      "d1",
+      "execute",
+      d1Name,
+      "--remote",
+      "--command",
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='user'",
+    ],
+    { allowFail: true },
+  );
+  if (result.status !== 0 || !result.combined.includes("user")) {
+    throw new Error(
+      `D1 schema check failed for ${d1Name} (user table missing). Re-run migrations or check D1 permissions.\n${result.combined.trim()}`,
+    );
+  }
+  console.log(`D1 schema OK on ${d1Name}`);
 }
 
 function deployApp(appDir, dryRun) {
@@ -509,6 +539,7 @@ async function goLive(opts) {
 
   if (!opts.dryRun) {
     applyMigrations(appDir, app.d1Database, false);
+    verifyD1Schema(appDir, app.d1Database, false);
   } else {
     console.log(`Would apply D1 migrations for ${app.d1Database}`);
   }
@@ -548,13 +579,13 @@ async function goLive(opts) {
   }
 
   if (!opts.dryRun && !opts.skipHealth && workersDevUrl) {
-    console.log(`Checking ${workersDevUrl}…`);
-    const status = await waitForUrl(workersDevUrl);
-    console.log(`Public URL ready (HTTP ${status}): ${workersDevUrl}`);
     const authProbe = `${workersDevUrl}/api/auth/get-session`;
     console.log(`Checking auth API ${authProbe}…`);
     const authStatus = await waitForUrl(authProbe);
     console.log(`Auth API ready (HTTP ${authStatus})`);
+    console.log(`Checking ${workersDevUrl}…`);
+    const status = await waitForUrl(workersDevUrl);
+    console.log(`Public URL ready (HTTP ${status}): ${workersDevUrl}`);
     if (urls.custom && urls.custom !== workersDevUrl) {
       try {
         const customStatus = await waitForUrl(urls.custom, {
