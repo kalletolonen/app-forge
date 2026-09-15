@@ -551,6 +551,10 @@ async function goLive(opts) {
     console.log(`Checking ${workersDevUrl}…`);
     const status = await waitForUrl(workersDevUrl);
     console.log(`Public URL ready (HTTP ${status}): ${workersDevUrl}`);
+    const authProbe = `${workersDevUrl}/api/auth/get-session`;
+    console.log(`Checking auth API ${authProbe}…`);
+    const authStatus = await waitForUrl(authProbe);
+    console.log(`Auth API ready (HTTP ${authStatus})`);
     if (urls.custom && urls.custom !== workersDevUrl) {
       try {
         const customStatus = await waitForUrl(urls.custom, {
