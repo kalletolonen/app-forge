@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./schema": "./src/schema.ts"
+    "./schema": "./src/schema.ts",
+    "./local": "./src/client-local.ts"
   },
   "scripts": {
     "db:push": "drizzle-kit push",

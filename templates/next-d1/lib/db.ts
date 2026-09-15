@@ -1,5 +1,5 @@
+import { createDbFromD1, type Db } from "@repo/database";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { createDbFromD1, createDbLocal, type Db } from "@repo/database";
 
 function dbBinding(env: unknown): D1Database | undefined {
   return (env as { DB?: D1Database }).DB;
@@ -23,7 +23,8 @@ export async function getDb(): Promise<Db> {
   }
 
   if (process.env.NODE_ENV === "development") {
-    return createDbLocal();
+    const { createDbLocal } = await import("@repo/database/local");
+    return createDbLocal() as unknown as Db;
   }
 
   throw new Error(

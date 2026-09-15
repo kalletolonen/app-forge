@@ -1,7 +1,2 @@
 export * from "./schema";
-export {
-  createDbFromD1,
-  createDbLocal,
-  type AppDb,
-  type Db,
-} from "./client";
+export { createDbFromD1, type AppDb, type Db } from "./client";

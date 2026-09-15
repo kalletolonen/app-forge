@@ -566,6 +566,10 @@ async function goLive(opts) {
     };
   }
 
+  if (app.stack === "next-d1" && !opts.dryRun) {
+    ensureAuthSecret(appDir, false);
+  }
+
   const deployOut = deployApp(appDir, opts.dryRun);
   const deployedUrl = parseWorkersDevUrl(deployOut);
   const workersDevUrl = urls.workersDev || deployedUrl;
@@ -573,9 +577,6 @@ async function goLive(opts) {
 
   if (!opts.dryRun) {
     await enableWorkersDev(accountId, token, app.workerName);
-    if (app.stack === "next-d1") {
-      ensureAuthSecret(appDir, opts.dryRun);
-    }
   }
 
   if (!opts.dryRun && !opts.skipHealth && workersDevUrl) {
